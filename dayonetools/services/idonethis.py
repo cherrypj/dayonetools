@@ -32,8 +32,6 @@ import os
 import re
 import uuid
 
-from dayonetools.services import convert_to_dayone_date_string
-
 DAYONE_ENTRIES = '/Users/durden/Dropbox/Apps/Day One/Journal.dayone/entries/'
 
 # Depending on where you entered your iDoneThis entry the text might be wrapped
@@ -42,7 +40,7 @@ STRIP_QUOTES = True
 
 # This text will be inserted into the first line of all entries created, set to
 # '' to remove this completely.
-HEADER_FOR_DAYONE_ENTRIES = 'iDoneThis entry'
+HEADER_FOR_DAYONE_ENTRIES = ''
 
 
 # Note the strange lack of indentation on the {entry_text} b/c day one will
@@ -131,6 +129,34 @@ def _sanitize_entry_text(entry_lines, strip_quotes):
         entry_text = re.sub('"', '', entry_text)
 
     return entry_text
+
+
+def convert_to_dayone_date_string(date):
+    """
+    Convert given date in 'yyyy-mm-dd' format into dayone accepted format of
+    iso8601
+
+    The timestamp will match the current time but year, month, and day will
+    be replaced with given arguments.
+    """
+
+    year, month, day = date.split('-')
+
+    now = datetime.now()
+
+    # Dayone doesn't read entries correctly when date has a ms component
+    ms = 0
+
+    date = now.replace(year=int(year),
+                       month=int(month),
+                       day=int(day),
+                       microsecond=ms)
+
+    iso_string = date.isoformat()
+
+    # Very specific format for dayone, if the 'Z' is not in the
+    # correct positions the entries will not show up in dayone at all.
+    return iso_string + 'Z'
 
 
 def main():
